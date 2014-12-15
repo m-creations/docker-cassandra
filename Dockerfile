@@ -1,35 +1,34 @@
-FROM abh1nav/java7
+FROM mcreations/openwrt-java:7
 
-MAINTAINER Abhinav Ajgaonkar <abhinav316@gmail.com>
+# Many thanks to the original author and maintainer of abh1nav/cassandra
+# Abhinav Ajgaonkar <abhinav316@gmail.com>
+
+MAINTAINER Kambiz Darabi <darabi@m-creations.net>
+
+ENV CASS_VERSION 2.1.2
+ENV AGENT_VERSION 5.0.1
+
+ENV CASSANDRA_HOME /opt/cassandra
+ENV CASSANDRA_CONF $CASSANDRA_HOME/conf
+
+ENV DATA_DIR /data
+ENV COMMITLOG_DIR /commitlog
+
+ADD image/root /
 
 # Download and extract Cassandra
-RUN \
-  mkdir /opt/cassandra; \
-  wget -O - http://www.us.apache.org/dist/cassandra/2.1.2/apache-cassandra-2.1.2-bin.tar.gz \
-  | tar xzf - --strip-components=1 -C "/opt/cassandra";
-
-# Download and extract DataStax OpsCenter Agent
-RUN \
-  mkdir /opt/agent; \
-  wget -O - http://downloads.datastax.com/community/datastax-agent-5.0.1.tar.gz \
-  | tar xzf - --strip-components=1 -C "/opt/agent";
-
-ADD	. /src
-
-# Copy over daemons
-RUN	\
-	cp /src/cassandra.yaml /opt/cassandra/conf/; \
-    mkdir -p /etc/service/cassandra; \
-    cp /src/cassandra-run /etc/service/cassandra/run; \
-    mkdir -p /etc/service/agent; \
-    cp /src/agent-run /etc/service/agent/run
+RUN mkdir -p ${CASSANDRA_CONF} && mkdir -p ${DATA_DIR} && mkdir -p ${COMMITLOG_DIR} && \
+  wget --progress=dot:giga http://www.us.apache.org/dist/cassandra/${CASS_VERSION}/apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
+  tar xzf apache-cassandra-${CASS_VERSION}-bin.tar.gz -C /tmp && \
+  rm apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
+  mv /tmp/apache-cassandra*/* /opt/cassandra && \
+  mkdir /opt/agent && \
+  wget --progress=dot:giga http://downloads.datastax.com/community/datastax-agent-${AGENT_VERSION}.tar.gz && \
+  tar xzf datastax-agent-${AGENT_VERSION}.tar.gz -C /tmp && \
+  rm datastax-agent-${AGENT_VERSION}.tar.gz && \
+  mv /tmp/*agent*/* /opt/agent
 
 # Expose ports
-EXPOSE 7199 7000 7001 9160 9042
+EXPOSE 7199 7000 7001 9160 9042 8888
 
-WORKDIR /opt/cassandra
-
-CMD ["/sbin/my_init"]
-
-# Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+CMD ["/start-cassandra"]
