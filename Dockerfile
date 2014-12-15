@@ -18,10 +18,11 @@ ADD image/root /
 
 # Download and extract Cassandra
 RUN mkdir -p ${CASSANDRA_CONF} && mkdir -p ${DATA_DIR} && mkdir -p ${COMMITLOG_DIR} && \
-  wget --progress=dot:giga http://www.us.apache.org/dist/cassandra/${CASS_VERSION}/apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
+  wget --progress=dot:giga http://www.apache.org/dist/cassandra/${CASS_VERSION}/apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
   tar xzf apache-cassandra-${CASS_VERSION}-bin.tar.gz -C /tmp && \
   rm apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
   mv /tmp/apache-cassandra*/* /opt/cassandra && \
+  rm -rf /opt/cassandra/javadoc && \
   mkdir /opt/agent && \
   wget --progress=dot:giga http://downloads.datastax.com/community/datastax-agent-${AGENT_VERSION}.tar.gz && \
   tar xzf datastax-agent-${AGENT_VERSION}.tar.gz -C /tmp && \
