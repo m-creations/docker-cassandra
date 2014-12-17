@@ -14,6 +14,7 @@ ENV CLUSTER_NAME testcluster
 
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF $CASSANDRA_HOME/conf
+ENV CASS_PASS cassandra
 
 ENV DATA_DIR /data
 ENV COMMITLOG_DIR /commitlog
