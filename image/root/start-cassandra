@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -e
 
 export PATH=$PATH:$JAVA_HOME/bin/bundled
 
@@ -32,10 +32,13 @@ ADDR=$(/sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
 check_env_var ADDR "Could not determine container's IP address"
 
 # Check if a seed was provided
-SEED=${SEED:=$ADDR}
-check_env_var OPS_IP
+if [ -z $SEEDS ] ; then
+    SEEDS=$ADDR
+else
+    SEEDS="${SEEDS},$ADDR"
+fi
 
-
+# TODO: replace this with a call to /opt/agent/bin/datastax-agent which uses config from /opt/agent/conf/datastax-agent-env.sh
 run_datastax-agent () {
 
     JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.trustStore=/opt/agent/ssl/agentKeyStore"
@@ -50,14 +53,17 @@ run_datastax-agent () {
     JVM_OPTS=""
 }
 
-printf "Starting DataStax Agent ... ";
-   cat <<EOF> /opt/agent/conf/address.yaml
+if [ -z $OPS_IP ] ; then
+    printf "No OPS_IP env var, will not start DataStax Agent\n\n"
+else
+    printf "Starting DataStax Agent ... ";
+    cat <<EOF> /opt/agent/conf/address.yaml
      stomp_interface: $OPS_IP
 EOF
-
-run_datastax-agent
-child=$!
-printf "done \n\n"
+    run_datastax-agent
+    child=$!
+    printf "done \n\n"
+fi
 
 printf "Starting Cassandra\n\n";
 
@@ -70,7 +76,7 @@ rpc_address: $ADDR
 seed_provider:
   - class_name: org.apache.cassandra.locator.SimpleSeedProvider
     parameters:
-      - seeds: "$SEED"
+      - seeds: "$SEEDS"
 data_file_directories:
   - $DATA_DIR
 commitlog_directory: $COMMITLOG_DIR
@@ -161,7 +167,6 @@ cat /tmp/cassandra-env.sh.in >> ${CASSANDRA_CONF}/cassandra-env.sh
 cd /opt/cassandra
 
 . "${CASSANDRA_CONF}/cassandra-env.sh"
-
 
 # Parse any command line options.
 classname="org.apache.cassandra.service.CassandraDaemon"
