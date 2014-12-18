@@ -86,7 +86,7 @@ max_hint_window_in_ms: 10800000 # 3 hours
 hinted_handoff_throttle_in_kb: 1024
 max_hints_delivery_threads: 2
 batchlog_replay_throttle_in_kb: 1024
-authenticator: AllowAllAuthenticator
+authenticator: PasswordAuthenticator
 authorizer: AllowAllAuthorizer
 permissions_validity_in_ms: 2000
 partitioner: org.apache.cassandra.dht.Murmur3Partitioner
@@ -171,7 +171,7 @@ cd /opt/cassandra
 # Parse any command line options.
 classname="org.apache.cassandra.service.CassandraDaemon"
 foreground="yes"
-properties="-XX:ErrorFile=/etc/cassandra -XX:HeapDumpPath=/etc/cassandra" 
+properties="-XX:ErrorFile=/etc/cassandra -XX:HeapDumpPath=/etc/cassandra"
 
 
 cassandra_parms="-Dlogback.configurationFile=logback.xml"
