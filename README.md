@@ -23,8 +23,10 @@ Cassandra server is started with the following settings which can also be passed
 
 - ```MAX_HEAP_SIZE``` 1 GB
 - ```HEAP_NEWSIZE``` 100 MB
-- ```CLUSTER_NAME```
+- ```CLUSTER_NAME``` the name of the cluster, default is 'testcluster'
 - ```SEEDS``` is set to the IP of the running container
+- ```DC``` data center used by [GossipingPropertyFileSnitch](http://www.datastax.com/documentation/cassandra/2.1/cassandra/architecture/architectureSnitchGossipPF_c.html), default is 'dc1'
+- ```RACK``` rack, default is 'r1'
 - ```OPS_IP``` optional address of OpsCenter
 - ```CASS_PASS``` password of the user 'cassandra'; default value is 'cassandra'
 - data directory is /data

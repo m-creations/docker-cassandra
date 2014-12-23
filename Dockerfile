@@ -21,7 +21,7 @@ ENV COMMITLOG_DIR /commitlog
 
 ADD image/root /
 
-# Download and extract Cassandra
+# Download and extract Cassandra and DataStax Agent, and install python for the tools
 RUN mkdir -p ${CASSANDRA_CONF} && mkdir -p ${DATA_DIR} && mkdir -p ${COMMITLOG_DIR} && \
   wget --progress=dot:giga http://www.apache.org/dist/cassandra/${CASS_VERSION}/apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
   tar xzf apache-cassandra-${CASS_VERSION}-bin.tar.gz -C /tmp && \
