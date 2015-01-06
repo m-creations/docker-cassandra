@@ -207,18 +207,18 @@ done
 exec java $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" $props "$classname" &
 casspid=$!
 
-# wait a bit
-# TODO: is there a better way to check whether cassandra is started and ready?
-sleep 20
+# wait until C* listens on the native (cqlsh) port
+until [ "x$(netstat -na | grep "LISTEN " | grep 9042)" != "x" ] ; do
+    sleep 1
+done
 
-# TODO: this one throws an error
 echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh localhost -u cassandra -p cassandra
 
-# echo "CREATE USER IF NOT EXISTS $USERNAME WITH PASSWORD '$PASSWORD'" | cqlsh localhost -u cassandra -p $CASSANDRA_PASSWORD
-
+password_changed_file=/data/.default_password_changed
 printf "\nStarted Cassandra"
-if [ "$CASS_PASS" != "cassandra" ] && [ ! -f /data/.default_password_changed ] ; then
+if [ "$CASS_PASS" != "cassandra" ] && [ ! -f $password_changed_file ] ; then
     echo "ALTER USER cassandra  WITH PASSWORD '$CASS_PASS';" | cqlsh localhost -u cassandra -p cassandra
+    touch $password_changed_file
     printf " adjusted cassandra password"
 fi
 
