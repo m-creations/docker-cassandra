@@ -212,10 +212,15 @@ until [ "x$(netstat -na | grep "LISTEN " | grep 9042)" != "x" ] ; do
     sleep 1
 done
 
-echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh localhost -u cassandra -p cassandra
+# after the socket appears, there is still a delay of 1 sec until
+# 'Created default superuser 'cassandra' appears in the log, so sleep a bit
+sleep 5
+
+echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh -u cassandra -p cassandra localhost
+
+printf "\nStarted Cassandra"
 
 password_changed_file=/data/.default_password_changed
-printf "\nStarted Cassandra"
 if [ "$CASS_PASS" != "cassandra" ] && [ ! -f $password_changed_file ] ; then
     echo "ALTER USER cassandra  WITH PASSWORD '$CASS_PASS';" | cqlsh localhost -u cassandra -p cassandra
     touch $password_changed_file
