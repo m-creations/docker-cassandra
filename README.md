@@ -11,10 +11,12 @@ docker run -d --name cass mcreations/openwrt-cassandra
 ```
 
 You can also use the container for the client tools (cqlsh etc.) by
-passing it the full path to the command:
+passing the tool and its arguments to the ```docker run``` command:
 
 ```
-docker run -it --link cass:cass mcreations/openwrt-cassandra /opt/cassandra/bin/cqlsh cass
+docker run -it --link cass:cass mcreations/openwrt-cassandra cqlsh cass
+
+docker run -it --link cass:cass mcreations/openwrt-cassandra nodetool -h cass
 ```
 
 ## Configuration Details

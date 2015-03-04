@@ -46,18 +46,18 @@ else
     SEEDS="${SEEDS},$ADDR"
 fi
 
-# TODO: replace this with a call to /opt/agent/bin/datastax-agent which uses config from /opt/agent/conf/datastax-agent-env.sh
+# TODO: replace this with a call to ${AGENT_HOME}/bin/datastax-agent which uses config from ${AGENT_HOME}/conf/datastax-agent-env.sh
 run_datastax-agent () {
 
-    JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.trustStore=/opt/agent/ssl/agentKeyStore"
-    JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStore=/opt/agent/ssl/agentKeyStore"
+    JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.trustStore=${AGENT_HOME}/ssl/agentKeyStore"
+    JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStore=${AGENT_HOME}/ssl/agentKeyStore"
     JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStorePassword=opscenter"
     JVM_OPTS="$JVM_OPTS -Dagent-pidfile=./datastax-agent.pid"
-    JVM_OPTS="$JVM_OPTS -Dlog4j.configuration=/opt/agent/conf/log4j.properties"
+    JVM_OPTS="$JVM_OPTS -Dlog4j.configuration=${AGENT_HOME}/conf/log4j.properties"
     JVM_OPTS="$JVM_OPTS -Xmx40M"
     JVM_OPTS="$JVM_OPTS -Xms40M"
-    mv /opt/agent/datastax-agent*standalone.jar /opt/agent/datastax-agent-standalone.jar
-    exec java $JVM_OPTS -jar "/opt/agent/datastax-agent-standalone.jar" "/opt/agent/conf/address.yaml" & 
+    mv ${AGENT_HOME}/datastax-agent*standalone.jar ${AGENT_HOME}/datastax-agent-standalone.jar
+    exec java $JVM_OPTS -jar "${AGENT_HOME}/datastax-agent-standalone.jar" "${AGENT_HOME}/conf/address.yaml" & 
     agentpid=$!
     JVM_OPTS=""
 }
@@ -66,7 +66,7 @@ if [ -z $OPS_IP ] ; then
     printf "No OPS_IP env var, will not start DataStax Agent\n\n"
 else
     printf "Starting DataStax Agent ... ";
-    cat <<EOF> /opt/agent/conf/address.yaml
+    cat <<EOF> ${AGENT_HOME}/conf/address.yaml
      stomp_interface: $OPS_IP
 EOF
     run_datastax-agent
@@ -182,7 +182,7 @@ EOF
 
 cat /tmp/cassandra-env.sh.in >> ${CASSANDRA_CONF}/cassandra-env.sh
 
-cd /opt/cassandra
+cd ${CASSANDRA_HOME}
 
 . "${CASSANDRA_CONF}/cassandra-env.sh"
 

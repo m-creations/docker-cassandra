@@ -12,9 +12,13 @@ ENV MAX_HEAP_SIZE 1G
 ENV HEAP_NEWSIZE 100m
 ENV CLUSTER_NAME testcluster
 
-ENV CASSANDRA_HOME /opt/cassandra
+ENV CASSANDRA_HOME /opt/cass
 ENV CASSANDRA_CONF $CASSANDRA_HOME/conf
 ENV CASS_PASS cassandra
+
+ENV AGENT_HOME /opt/agent
+
+ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${JAVA_HOME}/bin/bundled:${CASSANDRA_HOME}/bin:${AGENT_HOME}/bin
 
 ENV DATA_DIR /data
 ENV COMMITLOG_DIR /commitlog
@@ -26,17 +30,19 @@ RUN mkdir -p ${CASSANDRA_CONF} && mkdir -p ${DATA_DIR} && mkdir -p ${COMMITLOG_D
   wget --progress=dot:giga http://www.apache.org/dist/cassandra/${CASS_VERSION}/apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
   tar xzf apache-cassandra-${CASS_VERSION}-bin.tar.gz -C /tmp && \
   rm apache-cassandra-${CASS_VERSION}-bin.tar.gz && \
-  mv /tmp/apache-cassandra*/* /opt/cassandra && \
-  rm -rf /opt/cassandra/javadoc && \
+  mv /tmp/apache-cassandra*/* ${CASSANDRA_HOME} && \
+  sed -ie 's/JAVA_HOME\/bin\/java/JAVA_HOME\/bin\/bundled\/java/g' ${CASSANDRA_HOME}/bin/* && \
+  rm -rf ${CASSANDRA_HOME}/javadoc && \
   opkg update && \
   opkg install python && \
   rm /tmp/opkg-lists/* && \
-  mkdir /opt/agent && \
+  mkdir ${AGENT_HOME} && \
   wget --progress=dot:giga http://downloads.datastax.com/community/datastax-agent-${AGENT_VERSION}.tar.gz && \
   tar xzf datastax-agent-${AGENT_VERSION}.tar.gz -C /tmp && \
   rm datastax-agent-${AGENT_VERSION}.tar.gz && \
-  mv /tmp/*agent*/* /opt/agent && \
-  echo "export PATH=$PATH:$CASSANDRA_HOME/bin:/opt/agent/bin" >> /etc/profile
+  mv /tmp/*agent*/* ${AGENT_HOME} && \
+  sed -ie 's/JAVA_HOME\/bin\/java/JAVA_HOME\/bin\/bundled\/java/g' ${AGENT_HOME}/bin/* && \
+  echo "export PATH=$PATH" >> /etc/profile
 
 # Expose ports
 EXPOSE 7199 7000 7001 9160 9042 8888
