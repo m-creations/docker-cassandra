@@ -35,7 +35,8 @@ REPLICA=${REPLICA:="1"}
 export PATH=$PATH:$JAVA_HOME/bin/bundled:$CASSANDRA_HOME/bin
 
 # Grab the container IP
-ADDR=$(/sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
+iface=${NET_IFACE:="eth0"}
+ADDR=$(/sbin/ifconfig $iface | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')
 
 check_env_var ADDR "Could not determine container's IP address"
 
@@ -43,7 +44,7 @@ check_env_var ADDR "Could not determine container's IP address"
 if [ -z $SEEDS ] ; then
     SEEDS=$ADDR
 else
-    SEEDS="${SEEDS},$ADDR"
+    SEEDS="${SEEDS}"
 fi
 
 # TODO: replace this with a call to ${AGENT_HOME}/bin/datastax-agent which uses config from ${AGENT_HOME}/conf/datastax-agent-env.sh
@@ -88,7 +89,7 @@ EOF
 cat <<EOF> ${CASSANDRA_CONF}/cassandra.yaml
 cluster_name: '${CLUSTER_NAME}'
 listen_address: $ADDR
-broadcast_rpc_address: $ADDR
+broadcast_address: $ADDR
 rpc_address: $ADDR
 seed_provider:
   - class_name: org.apache.cassandra.locator.SimpleSeedProvider
@@ -132,7 +133,6 @@ start_native_transport: true
 native_transport_port: 9042
 start_rpc: true
 rpc_port: 9160
-rpc_address: 0.0.0.0
 rpc_keepalive: true
 rpc_server_type: sync
 thrift_framed_transport_size_in_mb: 15
@@ -216,16 +216,16 @@ done
 # 'Created default superuser 'cassandra' appears in the log, so sleep a bit
 sleep 5
 
-echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh -u cassandra -p cassandra localhost
-
 printf "\nStarted Cassandra"
 
 password_changed_file=/data/.default_password_changed
 if [ "$CASS_PASS" != "cassandra" ] && [ ! -f $password_changed_file ] ; then
-    echo "ALTER USER cassandra  WITH PASSWORD '$CASS_PASS';" | cqlsh localhost -u cassandra -p cassandra
+    echo "ALTER USER cassandra  WITH PASSWORD '$CASS_PASS';" | cqlsh $ADDR -u cassandra -p cassandra
     touch $password_changed_file
     printf " adjusted cassandra password"
 fi
+
+echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh -u cassandra -p $CASS_PASS $ADDR
 
 if [ "x$@" != "x" ] ; then
     args="$@"
@@ -235,7 +235,7 @@ if [ "x$@" != "x" ] ; then
     if [ $? = 1 ] ; then
         args="$args ;"
     fi
-    echo "$args" | cqlsh localhost -u cassandra -p $CASS_PASS
+    echo "$args" | cqlsh $ADDR -u cassandra -p $CASS_PASS
     printf " executed your command line script:\n--\n$args\n--\n"
 fi
 
