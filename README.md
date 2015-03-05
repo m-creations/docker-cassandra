@@ -30,7 +30,7 @@ Cassandra server is started with the following settings which can also be passed
 - ```DC``` data center used by [GossipingPropertyFileSnitch](http://www.datastax.com/documentation/cassandra/2.1/cassandra/architecture/architectureSnitchGossipPF_c.html), default is 'dc1'
 - ```RACK``` rack, default is 'r1'
 - ```OPS_IP``` optional address of OpsCenter
-- ```CASS_PASS``` password of the user 'cassandra'; default value is 'cassandra'
+- ```CASS_PASS``` password of the user 'cassandra'; default value is 'cassandra' (specify this only on the first seed node, when creating a cluster)
 - data directory is /data
 
 This is a sample command line with custom parameters:

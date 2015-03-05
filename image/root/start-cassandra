@@ -222,10 +222,9 @@ password_changed_file=/data/.default_password_changed
 if [ "$CASS_PASS" != "cassandra" ] && [ ! -f $password_changed_file ] ; then
     echo "ALTER USER cassandra  WITH PASSWORD '$CASS_PASS';" | cqlsh $ADDR -u cassandra -p cassandra
     touch $password_changed_file
+    echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh -u cassandra -p $CASS_PASS $ADDR
     printf " adjusted cassandra password"
 fi
-
-echo "ALTER KEYSPACE system_auth WITH REPLICATION ={'class' : 'NetworkTopologyStrategy', '${DC}' : $REPLICA };" | cqlsh -u cassandra -p $CASS_PASS $ADDR
 
 if [ "x$@" != "x" ] ; then
     args="$@"
