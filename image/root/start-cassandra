@@ -68,7 +68,8 @@ if [ -z $OPS_IP ] ; then
 else
     printf "Starting DataStax Agent ... ";
     cat <<EOF> ${AGENT_HOME}/conf/address.yaml
-     stomp_interface: $OPS_IP
+stomp_interface: $OPS_IP
+use_ssl: 0
 EOF
     run_datastax-agent
     printf "done \n\n"

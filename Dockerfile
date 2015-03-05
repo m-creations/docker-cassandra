@@ -6,7 +6,7 @@ FROM mcreations/openwrt-java:7
 MAINTAINER Kambiz Darabi <darabi@m-creations.net>
 
 ENV CASS_VERSION 2.1.2
-ENV AGENT_VERSION 5.0.1
+ENV AGENT_VERSION 5.1.0
 
 ENV MAX_HEAP_SIZE 1G
 ENV HEAP_NEWSIZE 100m
