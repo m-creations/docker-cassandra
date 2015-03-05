@@ -44,7 +44,25 @@ RUN mkdir -p ${CASSANDRA_CONF} && mkdir -p ${DATA_DIR} && mkdir -p ${COMMITLOG_D
   sed -ie 's/JAVA_HOME\/bin\/java/JAVA_HOME\/bin\/bundled\/java/g' ${AGENT_HOME}/bin/* && \
   echo "export PATH=$PATH" >> /etc/profile
 
-# Expose ports
-EXPOSE 7199 7000 7001 9160 9042 8888
+# Expose ports according to
+#
+# http://www.datastax.com/documentation/cassandra/2.1/cassandra/security/secureFireWall_r.html
+#
+# Cassandra inter-node cluster communication.
+EXPOSE 7000
+# Cassandra SSL inter-node cluster communication.
+EXPOSE 7001
+# Cassandra JMX monitoring port.
+EXPOSE 7199
+# Cassandra client port.
+EXPOSE 9042
+# Cassandra client port (Thrift).
+EXPOSE 9160
+
+# DataStax agent port. The agents listen on this port for SSL traffic initiated by OpsCenter.
+# cf. http://www.datastax.com/documentation/opscenter/5.0/opsc/reference/opscPorts_r.html
+# OpsCenter agent port. The agents listen on this port for SSL traffic initiated by OpsCenter.
+EXPOSE 61621
+
 
 CMD ["/start-cassandra"]
